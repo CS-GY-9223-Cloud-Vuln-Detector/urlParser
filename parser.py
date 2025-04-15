@@ -5,6 +5,8 @@ from git import Repo
 from supabase import create_client, Client
 import stat
 from dotenv import load_dotenv
+from helper import add_project, add_file
+import uuid
 
 load_dotenv()
 
@@ -19,6 +21,8 @@ def remove_readonly(func, path, _):
     func(path)
 
 class GitHubParser:
+    new_project_id = str(uuid.uuid4())
+
     def __init__(self, repo_url):
         self.repo_url = repo_url
         self.clone_dir = tempfile.mkdtemp()
@@ -26,6 +30,7 @@ class GitHubParser:
     def clone_repo(self):
         print(f"Cloning {self.repo_url} into {self.clone_dir}")
         repo = Repo.clone_from(self.repo_url, self.clone_dir)
+        add_project(self.new_project_id, self.repo_url, "0582705d-27c1-434c-b079-7775a7451e70")
         repo.close()
         print("Repo cloned.")
 
@@ -50,12 +55,14 @@ class GitHubParser:
                 print(f"Uploading {relative_path} to Supabase...")
 
                 try:
+                    file_name = self.new_project_id + "/" + relative_path
                     supabase.storage.from_(BUCKET_NAME).upload(
-                        path=relative_path,
+                        path=file_name,
                         file=file_data,
                         file_options={"content-type": "text/x-python"}
                     )
                     uploaded.append(relative_path)
+                    add_file(self.new_project_id, file_name)
                 except Exception as e:
                     print(f"Failed to upload {relative_path}: {e}")
         return uploaded
@@ -77,6 +84,6 @@ if __name__ == "__main__":
     repo_url = input("Enter GitHub repo URL: ").strip()
     parser = GitHubParser(repo_url)
     uploaded_files = parser.process()
-    print("\\nUploaded Files:")
+    print("Uploaded Files:")
     for f in uploaded_files:
         print(f)
