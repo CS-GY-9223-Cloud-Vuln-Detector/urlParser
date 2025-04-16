@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GitHub Parser</title>
+  <style>
+    input[type="text"] {
+      width: 600px;
+      padding: 10px
+    }
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>GitHub Repository URL parser</h2>
+  <input type="text" id="repoUrl" placeholder="Enter GitHub repo URL" />
+  <button onclick="submitRepo()">Run Parser</button>
+
+  <div class="message" id="resultMessage"></div>
+
+  <script>
+    async function submitRepo() {
+      const repoUrl = document.getElementById("repoUrl").value;
+      const result = document.getElementById("resultMessage");
+      result.textContent = "Processing...";
+  
+      try {
+        const response = await fetch("http://localhost:5000/parse", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ repo_url: repoUrl })
+        });
+  
+        const data = await response.json();
+        if (response.ok) {
+          let message = `Successfully uploaded ${data.files_uploaded.length} files to project ${data.project_id}:<br><ul>`;
+          data.files_uploaded.forEach(file => {
+            message += `<li>${file}</li>`;
+          });
+          message += "</ul>";
+          result.innerHTML = message;
+        } else {
+          result.textContent = `Error: ${data.error}`;
+        }
+      } catch (err) {
+        result.textContent = `Request failed: ${err}`;
+      }
+    }
+  </script>
+</body>
+</html>

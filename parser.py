@@ -21,11 +21,11 @@ def remove_readonly(func, path, _):
     func(path)
 
 class GitHubParser:
-    new_project_id = str(uuid.uuid4())
 
     def __init__(self, repo_url):
         self.repo_url = repo_url
         self.clone_dir = tempfile.mkdtemp()
+        self.new_project_id = str(uuid.uuid4())
 
     def clone_repo(self):
         print(f"Cloning {self.repo_url} into {self.clone_dir}")
@@ -45,6 +45,7 @@ class GitHubParser:
 
     def upload_files(self, file_paths):
         uploaded = []
+        file_ids = []
         for file_path in file_paths:
             relative_path = os.path.relpath(file_path, self.clone_dir)
             relative_path = relative_path.replace("\\", "/")
@@ -62,10 +63,10 @@ class GitHubParser:
                         file_options={"content-type": "text/x-python"}
                     )
                     uploaded.append(relative_path)
-                    add_file(self.new_project_id, file_name)
+                    file_ids.append(add_file(self.new_project_id, file_name))
                 except Exception as e:
                     print(f"Failed to upload {relative_path}: {e}")
-        return uploaded
+        return uploaded, file_ids
 
     def clean_up(self):
         shutil.rmtree(self.clone_dir, onerror=remove_readonly)
@@ -75,8 +76,8 @@ class GitHubParser:
         try:
             self.clone_repo()
             py_files = self.find_python_files()
-            uploaded_files = self.upload_files(py_files)
-            return uploaded_files
+            uploaded_files, file_ids = self.upload_files(py_files)
+            return uploaded_files, file_ids, self.new_project_id
         finally:
             self.clean_up()
 

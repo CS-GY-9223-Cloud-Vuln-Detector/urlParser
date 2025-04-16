@@ -12,6 +12,9 @@ def add_project(project_id: str, repo_url: str, project_owner: str):
     created_at = datetime.now().isoformat()
     name = repo_url.split("/")[-1].split(".")[0].strip()
 
+    if repo_url.endswith(".git"):
+        repo_url = repo_url[:-4]
+
     data = {
         "id": project_id,
         "name": name,
@@ -40,6 +43,7 @@ def add_file(project_id: str, file_name: str):
     try:
         response = supabase.table("files").insert(data).execute()
         print("File inserted:", response)
+        return id
     except Exception as e:
         print("Failed to insert file:", e)
 
