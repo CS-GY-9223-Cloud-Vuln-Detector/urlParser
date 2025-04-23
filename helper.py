@@ -2,11 +2,15 @@ from supabase import create_client, Client
 import uuid
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 def add_project(project_id: str, repo_url: str, project_owner: str):
     created_at = datetime.now().isoformat()
@@ -20,7 +24,7 @@ def add_project(project_id: str, repo_url: str, project_owner: str):
         "name": name,
         "repo_url": repo_url,
         "project_owner": project_owner,
-        "created_at": created_at
+        "created_at": created_at,
     }
 
     try:
@@ -28,6 +32,7 @@ def add_project(project_id: str, repo_url: str, project_owner: str):
         print("Project inserted:", response)
     except Exception as e:
         print("Failed to insert project:", e)
+
 
 def add_file(project_id: str, file_name: str):
     id = str(uuid.uuid4())
@@ -37,7 +42,7 @@ def add_file(project_id: str, file_name: str):
         "id": id,
         "file_name": file_name,
         "project_id": project_id,
-        "created_at": created_at
+        "created_at": created_at,
     }
 
     try:
@@ -46,4 +51,3 @@ def add_file(project_id: str, file_name: str):
         return id
     except Exception as e:
         print("Failed to insert file:", e)
-

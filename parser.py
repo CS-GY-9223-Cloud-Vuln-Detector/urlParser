@@ -16,9 +16,11 @@ BUCKET_NAME = "cloud-files"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+
 def remove_readonly(func, path, _):
     os.chmod(path, stat.S_IWRITE)
     func(path)
+
 
 class GitHubParser:
 
@@ -30,7 +32,9 @@ class GitHubParser:
     def clone_repo(self):
         print(f"Cloning {self.repo_url} into {self.clone_dir}")
         repo = Repo.clone_from(self.repo_url, self.clone_dir)
-        add_project(self.new_project_id, self.repo_url, "0582705d-27c1-434c-b079-7775a7451e70")
+        add_project(
+            self.new_project_id, self.repo_url, "0582705d-27c1-434c-b079-7775a7451e70"
+        )
         repo.close()
         print("Repo cloned.")
 
@@ -38,7 +42,7 @@ class GitHubParser:
         py_files = []
         for root, _, files in os.walk(self.clone_dir):
             for file in files:
-                if file.endswith('.py'):
+                if file.endswith(".py"):
                     full_path = os.path.join(root, file)
                     py_files.append(full_path)
         return py_files
@@ -50,7 +54,7 @@ class GitHubParser:
             relative_path = os.path.relpath(file_path, self.clone_dir)
             relative_path = relative_path.replace("\\", "/")
 
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 file_data = f.read()
 
                 print(f"Uploading {relative_path} to Supabase...")
@@ -60,7 +64,7 @@ class GitHubParser:
                     supabase.storage.from_(BUCKET_NAME).upload(
                         path=file_name,
                         file=file_data,
-                        file_options={"content-type": "text/x-python"}
+                        file_options={"content-type": "text/x-python"},
                     )
                     uploaded.append(relative_path)
                     file_ids.append(add_file(self.new_project_id, file_name))
@@ -80,6 +84,7 @@ class GitHubParser:
             return uploaded_files, file_ids, self.new_project_id
         finally:
             self.clean_up()
+
 
 if __name__ == "__main__":
     repo_url = input("Enter GitHub repo URL: ").strip()
