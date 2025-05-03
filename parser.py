@@ -24,8 +24,9 @@ def remove_readonly(func, path, _):
 
 class GitHubParser:
 
-    def __init__(self, repo_url):
+    def __init__(self, repo_url, user_id):
         self.repo_url = repo_url
+        self.user_id = user_id
         self.clone_dir = tempfile.mkdtemp()
         self.new_project_id = str(uuid.uuid4())
 
@@ -33,7 +34,7 @@ class GitHubParser:
         print(f"Cloning {self.repo_url} into {self.clone_dir}")
         repo = Repo.clone_from(self.repo_url, self.clone_dir)
         add_project(
-            self.new_project_id, self.repo_url, "0582705d-27c1-434c-b079-7775a7451e70"
+            self.new_project_id, self.repo_url, self.user_id
         )
         repo.close()
         print("Repo cloned.")
