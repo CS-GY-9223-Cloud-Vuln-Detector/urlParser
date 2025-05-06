@@ -32,10 +32,11 @@
       result.textContent = "Processing...";
   
       try {
-        const response = await fetch("http://localhost:5000/parse", {
+        const response = await fetch("http://localhost:6060/parse", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer YOUR_JWT_TOKEN"
           },
           body: JSON.stringify({ repo_url: repoUrl })
         });

@@ -5,7 +5,7 @@ from git import Repo
 from supabase import create_client, Client
 import stat
 from dotenv import load_dotenv
-from helper import add_project, add_file
+from helper import *
 import uuid
 
 load_dotenv()
@@ -51,9 +51,13 @@ class GitHubParser:
     def upload_files(self, file_paths):
         uploaded = []
         file_ids = []
+
         for file_path in file_paths:
             relative_path = os.path.relpath(file_path, self.clone_dir)
             relative_path = relative_path.replace("\\", "/")
+
+            md5_hash = calculate_md5(file_path)
+            loc = count_lines(file_path)
 
             with open(file_path, "rb") as f:
                 file_data = f.read()
@@ -67,8 +71,9 @@ class GitHubParser:
                         file=file_data,
                         file_options={"content-type": "text/x-python"},
                     )
+                    file_url = supabase.storage.from_(BUCKET_NAME).get_public_url(file_name)
                     uploaded.append(relative_path)
-                    file_ids.append(add_file(self.new_project_id, file_name))
+                    file_ids.append(add_file(self.new_project_id, file_name, md5_hash, loc, self.new_project_id, relative_path, file_url))
                 except Exception as e:
                     print(f"Failed to upload {relative_path}: {e}")
         return uploaded, file_ids

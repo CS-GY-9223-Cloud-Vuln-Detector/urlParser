@@ -60,7 +60,7 @@ def token_required(f):
 def parse_repo():
     data = request.get_json()
     repo_url = data.get("repo_url")
-    user_id = g.current_user_profile.id
+    user_id = g.current_user_profile["id"]
 
     if not repo_url:
         return jsonify({"error": "Missing repo_url"}), 400
