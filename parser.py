@@ -33,9 +33,6 @@ class GitHubParser:
     def clone_repo(self):
         print(f"Cloning {self.repo_url} into {self.clone_dir}")
         repo = Repo.clone_from(self.repo_url, self.clone_dir)
-        add_project(
-            self.new_project_id, self.repo_url, self.user_id
-        )
         repo.close()
         print("Repo cloned.")
 
@@ -86,6 +83,8 @@ class GitHubParser:
         try:
             self.clone_repo()
             py_files = self.find_python_files()
+            file_count = len(py_files)
+            add_project(self.new_project_id, self.repo_url, self.user_id, file_count)
             uploaded_files, file_ids = self.upload_files(py_files)
             return uploaded_files, file_ids, self.new_project_id
         finally:

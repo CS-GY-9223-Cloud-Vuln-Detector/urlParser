@@ -16,7 +16,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
-def add_project(project_id: str, repo_url: str, project_owner: str):
+def add_project(project_id: str, repo_url: str, project_owner: str, file_count: int):
     created_at = datetime.now().isoformat()
     name = repo_url.split("/")[-1].split(".")[0].strip()
 
@@ -29,6 +29,7 @@ def add_project(project_id: str, repo_url: str, project_owner: str):
         "repo_url": repo_url,
         "project_owner": project_owner,
         "created_at": created_at,
+        "file_count": file_count,
     }
 
     try:
