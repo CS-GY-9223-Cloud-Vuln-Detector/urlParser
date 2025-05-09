@@ -3,3 +3,5 @@ flask-cors
 python-dotenv
 gitpython
 supabase
+boto3
+botocore

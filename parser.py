@@ -7,15 +7,17 @@ import stat
 from dotenv import load_dotenv
 from helper import *
 import uuid
+import boto3
+from botocore.exceptions import ClientError
 
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-BUCKET_NAME = "cloud-files"
+BUCKET_NAME = "vulnscan-prod-files"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
+s3 = boto3.client("s3")
 
 def remove_readonly(func, path, _):
     os.chmod(path, stat.S_IWRITE)
@@ -59,14 +61,15 @@ class GitHubParser:
             with open(file_path, "rb") as f:
                 file_data = f.read()
 
-                print(f"Uploading {relative_path} to Supabase...")
+                print(f"Uploading {relative_path} to S3...")
 
                 try:
                     file_name = self.new_project_id + "/" + relative_path
-                    supabase.storage.from_(BUCKET_NAME).upload(
-                        path=file_name,
-                        file=file_data,
-                        file_options={"content-type": "text/x-python"},
+                    s3.put_object(
+                        Bucket=BUCKET_NAME,
+                        Key=file_name,
+                        Body=file_data,
+                        ContentType="text/x-python"
                     )
                     file_url = supabase.storage.from_(BUCKET_NAME).get_public_url(file_name)
                     uploaded.append(relative_path)
